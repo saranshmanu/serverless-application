@@ -24,10 +24,12 @@
   },
   "dependencies": {
     "@aws-cdk/aws-apigateway": "^1.94.1",
+    "@aws-cdk/aws-iam": "^1.96.0",
     "@aws-cdk/aws-lambda": "^1.94.1",
     "@aws-cdk/aws-logs": "^1.94.1",
     "@aws-cdk/aws-logs-destinations": "^1.96.0",
     "@aws-cdk/core": "1.94.1",
+    "cdk-constants": "^3.0.3",
     "source-map-support": "^0.5.16"
   }
 }

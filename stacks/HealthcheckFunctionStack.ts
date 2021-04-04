@@ -1,10 +1,16 @@
-import { LogGroup, SubscriptionFilter, FilterPattern } from '@aws-cdk/aws-logs';
+import { Role, ManagedPolicy, ServicePrincipal } from '@aws-cdk/aws-iam'
+import { StringParameter } from '@aws-cdk/aws-ssm';
 import { Stack, StackProps, Construct } from '@aws-cdk/core';
-import { Function, LayerVersion, Runtime, Code, IFunction } from '@aws-cdk/aws-lambda';
-import { LambdaIntegration, RestApi } from '@aws-cdk/aws-apigateway';
+import { ManagedPolicies, ServicePrincipals } from "cdk-constants";
 import { LambdaDestination } from '@aws-cdk/aws-logs-destinations';
+import { LambdaIntegration, RestApi } from '@aws-cdk/aws-apigateway';
+import { LogGroup, SubscriptionFilter, FilterPattern } from '@aws-cdk/aws-logs';
+import { Function, LayerVersion, Runtime, Code, IFunction } from '@aws-cdk/aws-lambda';
 
 class HealthcheckFunction extends Stack {
+
+	managedPolicy: Role;
+	lambdaLayer: LayerVersion;
 
 	/**
 	 * The function creates a lambda layer for utils
@@ -28,6 +34,7 @@ class HealthcheckFunction extends Stack {
 		const lambda = new Function(this, params.name as string, {
 			runtime: Runtime.NODEJS_12_X,
 			code: Code.fromAsset(params.path as string),
+			role: this.managedPolicy,
 			handler: params.handler as string,
 			layers: [params.layer as LayerVersion],
 			environment: params.environment as {
@@ -39,15 +46,28 @@ class HealthcheckFunction extends Stack {
 
 	constructor(scope: Construct, id: string, props?: StackProps) {
 		super(scope, id, props);
+
+		/**
+		 * Managed Policy
+		 */
+		this.managedPolicy = new Role(this, 'ssm-managed-policy', {
+			assumedBy: new ServicePrincipal(ServicePrincipals.SSM),
+			managedPolicies: [
+				ManagedPolicy.fromAwsManagedPolicyName(ManagedPolicies.AMAZON_SSM_READ_ONLY_ACCESS)
+			]
+		});
+
 		/** 
 		 * Lambda Layer for dependencies 
 		 */
-		const layer = this.createLayer()
+		this.lambdaLayer = this.createLayer()
+
 		/** 
 		 * API Gateway for endpoints 
 		 */
 		const gateway = new RestApi(this, 'serverless-application-api', {});
 		const api = gateway.root.addResource('api');
+
 		/** 
 		 * Healthcheck Endpoint 
 		 */
@@ -55,17 +75,19 @@ class HealthcheckFunction extends Stack {
 			name: 'healthcheck-function',
 			handler: 'index.handler',
 			path: './src/healthcheck/get/',
-			layer: layer,
+			layer: this.lambdaLayer,
 			environment: {
-				NODE_ENV: 'dev'
+				NODE_ENV: 'dev',
+				SSM_PARAMETER: StringParameter.valueFromLookup(this, 'my-plain-parameter-name')
 			}
 		})
 		const lambdaIntegration = new LambdaIntegration(lambdaFunction)
 		api.addResource('healthcheck').addMethod('GET', lambdaIntegration);
+
 		/**
 		 * Log Group for the stack 
 		 */
-		const logGroup = new LogGroup(this, 'HealthcheckLogGroup', { retention: Infinity });
+		const logGroup = new LogGroup(this, 'healthcheck-log-group', { retention: Infinity });
 		const filterPattern = FilterPattern.allEvents();
 		const configuration = {
 			destination: new LambdaDestination(lambdaFunction),
