@@ -77,7 +77,7 @@ class HealthcheckFunction extends Stack {
 			path: './src/healthcheck/get/',
 			layer: this.lambdaLayer,
 			environment: {
-				NODE_ENV: 'dev',
+				NODE_ENV: process.env.NODE_ENV,
 				SSM_PARAMETER: StringParameter.valueFromLookup(this, 'my-plain-parameter-name')
 			}
 		})

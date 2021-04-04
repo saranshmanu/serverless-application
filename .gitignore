@@ -4,6 +4,7 @@
 package-lock.json
 node_modules
 dist
+cdk.context.json
 
 # CDK asset staging directory
 .cdk.staging
