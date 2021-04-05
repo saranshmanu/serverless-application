@@ -10,7 +10,9 @@
     "@aws-cdk/aws-s3:grantWriteWithoutAcl": true,
     "@aws-cdk/aws-ecs-patterns:removeDefaultDesiredCount": true,
     "dev": {
-      "NODE_ENV": "dev"
+      "NODE_ENV": "dev",
+      "CDK_DEFAULT_REGION": "us-east-1",
+      "CDK_DEFAULT_ACCOUNT": ""
     },
     "stage": {
       "NODE_ENV": "stage"
