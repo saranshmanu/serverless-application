@@ -7,47 +7,47 @@ import { Function, LayerVersion, Runtime, Code } from '@aws-cdk/aws-lambda';
 import { StringParameter } from '@aws-cdk/aws-ssm';
 
 interface MultistackProps extends StackProps {
-	role: Role;
-	gateway: IResource;
-	lambdaLayer: LayerVersion;
-	authorizer: RequestAuthorizer;
-	variables: Record<string, string>
+  role: Role;
+  gateway: IResource;
+  lambdaLayer: LayerVersion;
+  authorizer: RequestAuthorizer;
+  variables: Record<string, string>
 }
 
 class HealthcheckFunction extends Stack {
 
-	constructor(scope: Construct, id: string, props: MultistackProps) {
-		super(scope, id, props);
+  constructor(scope: Construct, id: string, props: MultistackProps) {
+    super(scope, id, props);
 
-		const lambda = new Function(this, 'healthcheck-function', {
-			functionName: 'healthcheck-function',
-			handler: 'index.handler',
-			code: Code.fromAsset('./src/healthcheck/get/'),
-			runtime: Runtime.NODEJS_12_X,
-			layers: [props.lambdaLayer],
-			role: props.role,
-			environment: {
-				NODE_ENV: props.variables.NODE_ENV,
-				SSM_PARAMETER: StringParameter.valueForStringParameter(this, 'my-plain-parameter-name')
-			}
-		});
+    const lambda = new Function(this, 'healthcheck-function', {
+      functionName: 'healthcheck-function',
+      handler: 'index.handler',
+      code: Code.fromAsset('./src/healthcheck/get/'),
+      runtime: Runtime.NODEJS_12_X,
+      layers: [props.lambdaLayer],
+      role: props.role,
+      environment: {
+        NODE_ENV: props.variables.NODE_ENV,
+        SSM_PARAMETER: StringParameter.valueForStringParameter(this, 'my-plain-parameter-name')
+      }
+    });
 
-		const lambdaIntegration = new LambdaIntegration(lambda)
-		props.gateway.addResource('healthcheck').addMethod('GET', lambdaIntegration, {
-			authorizationType: AuthorizationType.CUSTOM,
-			authorizer: props.authorizer
-		});
+    const lambdaIntegration = new LambdaIntegration(lambda)
+    props.gateway.addResource('healthcheck').addMethod('GET', lambdaIntegration, {
+      authorizationType: AuthorizationType.CUSTOM,
+      authorizer: props.authorizer
+    });
 
-		const logGroup = new LogGroup(this, 'healthcheck-log-group', { retention: Infinity });
-		const filterPattern = FilterPattern.allEvents();
-		const configuration = {
-			physicalName: 'elastic-search-subscription',
-			destination: new LambdaDestination(lambda),
-			filterPattern: filterPattern,
-			logGroup: logGroup,
-		}
-		new SubscriptionFilter(this, 'elastic-search-subscription', configuration);
-	}
+    const logGroup = new LogGroup(this, 'healthcheck-log-group', { retention: Infinity });
+    const filterPattern = FilterPattern.allEvents();
+    const configuration = {
+      physicalName: 'elastic-search-subscription',
+      destination: new LambdaDestination(lambda),
+      filterPattern: filterPattern,
+      logGroup: logGroup,
+    }
+    new SubscriptionFilter(this, 'elastic-search-subscription', configuration);
+  }
 }
 
 export { HealthcheckFunction }

@@ -1,37 +1,35 @@
 {
-  "name": "serverless-application",
-  "version": "0.1.0",
-  "bin": {
-    "serverless-application": "bin/serverless-application.js"
-  },
-  "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
-    "test": "jest",
-    "cdk": "cdk",
-    "lint": "eslint . --ext .ts",
-    "synth": "cdk synth  --quiet",
-    "deploy": "cdk deploy --all --verbose"
-  },
-  "devDependencies": {
-    "@aws-cdk/assert": "1.94.1",
-    "@types/aws-lambda": "^8.10.73",
-    "@types/node": "10.17.27",
-    "@typescript-eslint/eslint-plugin": "^4.19.0",
-    "@typescript-eslint/parser": "^4.19.0",
-    "aws-cdk": "1.94.1",
-    "eslint": "^7.22.0",
-    "ts-node": "^9.0.0",
-    "typescript": "~3.9.7"
-  },
-  "dependencies": {
-    "@aws-cdk/aws-apigateway": "^1.94.1",
-    "@aws-cdk/aws-iam": "^1.96.0",
-    "@aws-cdk/aws-lambda": "^1.94.1",
-    "@aws-cdk/aws-logs": "^1.94.1",
-    "@aws-cdk/aws-logs-destinations": "^1.96.0",
-    "@aws-cdk/core": "1.94.1",
-    "cdk-constants": "^3.0.3",
-    "source-map-support": "^0.5.16"
-  }
+	"name": "serverless-application",
+	"version": "0.1.0",
+	"bin": {
+		"serverless-application": "bin/serverless-application.js"
+	},
+	"scripts": {
+		"build": "tsc",
+		"watch": "tsc -w",
+		"test": "jest",
+		"cdk": "cdk",
+		"lint": "eslint . --ext .ts",
+		"synth": "cdk synth  --quiet",
+		"deploy": "cdk deploy --all --verbose"
+	},
+	"devDependencies": {
+		"@aws-cdk/assert": "1.94.1",
+		"@types/aws-lambda": "^8.10.73",
+		"@types/node": "10.17.27",
+		"aws-cdk": "1.94.1",
+		"eslint": "^7.22.0",
+		"ts-node": "^9.0.0",
+		"typescript": "~3.9.7"
+	},
+	"dependencies": {
+		"@aws-cdk/aws-apigateway": "^1.94.1",
+		"@aws-cdk/aws-iam": "^1.96.0",
+		"@aws-cdk/aws-lambda": "^1.94.1",
+		"@aws-cdk/aws-logs": "^1.94.1",
+		"@aws-cdk/aws-logs-destinations": "^1.96.0",
+		"@aws-cdk/core": "1.94.1",
+		"cdk-constants": "^3.0.3",
+		"source-map-support": "^0.5.16"
+	}
 }
