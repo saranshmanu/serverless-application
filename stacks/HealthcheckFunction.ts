@@ -1,15 +1,17 @@
 import { Role } from '@aws-cdk/aws-iam'
 import { Stack, StackProps, Construct } from '@aws-cdk/core';
 import { LambdaDestination } from '@aws-cdk/aws-logs-destinations';
-import { LambdaIntegration, IResource, CfnAuthorizer, AuthorizationType } from '@aws-cdk/aws-apigateway';
+import { LambdaIntegration, IResource, AuthorizationType, RequestAuthorizer } from '@aws-cdk/aws-apigateway';
 import { LogGroup, SubscriptionFilter, FilterPattern } from '@aws-cdk/aws-logs';
-import { Function, LayerVersion, Runtime, Code, IFunction } from '@aws-cdk/aws-lambda';
+import { Function, LayerVersion, Runtime, Code } from '@aws-cdk/aws-lambda';
+import { StringParameter } from '@aws-cdk/aws-ssm';
 
 interface MultistackProps extends StackProps {
+	role: Role;
 	gateway: IResource;
 	lambdaLayer: LayerVersion;
-	managedPolicy: Role;
-	authorizer: CfnAuthorizer;
+	authorizer: RequestAuthorizer;
+	variables: Record<string, string>
 }
 
 class HealthcheckFunction extends Stack {
@@ -22,18 +24,18 @@ class HealthcheckFunction extends Stack {
 			handler: 'index.handler',
 			code: Code.fromAsset('./src/healthcheck/get/'),
 			runtime: Runtime.NODEJS_12_X,
-			role: props.managedPolicy,
 			layers: [props.lambdaLayer],
+			role: props.role,
 			environment: {
-				NODE_ENV: process.env.NODE_ENV || '',
-				// SSM_PARAMETER: StringParameter.valueFromLookup(this, 'my-plain-parameter-name')
+				NODE_ENV: props.variables.NODE_ENV,
+				SSM_PARAMETER: StringParameter.valueForStringParameter(this, 'my-plain-parameter-name')
 			}
 		});
 
 		const lambdaIntegration = new LambdaIntegration(lambda)
 		props.gateway.addResource('healthcheck').addMethod('GET', lambdaIntegration, {
 			authorizationType: AuthorizationType.CUSTOM,
-			authorizer: { authorizerId: props.authorizer.ref }
+			authorizer: props.authorizer
 		});
 
 		const logGroup = new LogGroup(this, 'healthcheck-log-group', { retention: Infinity });

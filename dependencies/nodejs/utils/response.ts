@@ -2,7 +2,7 @@ import { Logger } from "tslog";
 const log: Logger = new Logger();
 
 const create = (statusCode: number, response: Record<string, unknown>) => {
-  log.silly("Generating response");
+  console.log("Generating response");
   return {
     statusCode: statusCode,
     headers: {

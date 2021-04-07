@@ -4,15 +4,15 @@ import { ManagedPolicies, ServicePrincipals } from "cdk-constants";
 
 class SSMManagedPolicy extends Stack {
 
-	managedPolicy: Role;
+	role: Role;
 
 	constructor(scope: Construct, id: string, props: StackProps) {
 		super(scope, id, props);
-		this.managedPolicy = new Role(this, 'ssm-managed-policy', {
+		this.role = new Role(this, 'ssm-managed-policy', {
       roleName: 'serverless-ssm-managed-policy',
-			assumedBy: new ServicePrincipal(ServicePrincipals.SSM),
+			assumedBy: new ServicePrincipal(ServicePrincipals.LAMBDA),
 			managedPolicies: [
-				ManagedPolicy.fromAwsManagedPolicyName(ManagedPolicies.AMAZON_SSM_READ_ONLY_ACCESS)
+				ManagedPolicy.fromAwsManagedPolicyName(ManagedPolicies.AMAZON_SSM_FULL_ACCESS)
 			]
 		});
 	}

@@ -9,10 +9,13 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "synth": "cdk synth  --quiet",
+    "deploy": "cdk deploy --all --verbose"
   },
   "devDependencies": {
     "@aws-cdk/assert": "1.94.1",
+    "@types/aws-lambda": "^8.10.73",
     "@types/node": "10.17.27",
     "@typescript-eslint/eslint-plugin": "^4.19.0",
     "@typescript-eslint/parser": "^4.19.0",

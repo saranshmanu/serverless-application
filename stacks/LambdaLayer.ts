@@ -1,4 +1,4 @@
-import { Stack, StackProps, Construct, CfnOutput } from '@aws-cdk/core';
+import { Stack, StackProps, Construct } from '@aws-cdk/core';
 import { LayerVersion, Runtime, Code } from '@aws-cdk/aws-lambda';
 
 class LambdaLayer extends Stack {

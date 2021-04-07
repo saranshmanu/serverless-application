@@ -7,6 +7,8 @@ import { SSMManagedPolicy } from '../stacks/ManagedPolicy';
 import { HealthcheckFunction } from '../stacks/HealthcheckFunction';
 
 const app = new cdk.App();
+const stage = app.node.tryGetContext('STAGE') as string;
+const parameters = app.node.tryGetContext(stage) as Record<string, string>
 
 const env = {
   account: process.env.CDK_DEFAULT_ACCOUNT,
@@ -17,7 +19,7 @@ const lambdaLayerStack = new LambdaLayer(app, 'LambdaLayerStack', { env })
 const managedPolicyStack = new SSMManagedPolicy(app, 'ManagedPolicyStack', { env })
 const gatewayStack = new Gateway(app, 'GatewayStack', {
   lambdaLayer: lambdaLayerStack.lambdaLayer,
-  managedPolicy: managedPolicyStack.managedPolicy,
+  role: managedPolicyStack.role,
   region: env.region,
   env,
 })
@@ -25,8 +27,11 @@ const gatewayStack = new Gateway(app, 'GatewayStack', {
 new HealthcheckFunction(app, 'HealthcheckFunctionStack', {
   gateway: gatewayStack.gateway,
   lambdaLayer: lambdaLayerStack.lambdaLayer,
-  managedPolicy: managedPolicyStack.managedPolicy,
+  role: managedPolicyStack.role,
   authorizer: gatewayStack.authorizer,
-  env
+  variables: {
+    NODE_ENV: parameters.NODE_ENV,
+  },
+  env,
 })
 

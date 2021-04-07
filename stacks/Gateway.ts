@@ -1,20 +1,20 @@
 import { Role } from '@aws-cdk/aws-iam'
 import { Stack, StackProps, Construct } from '@aws-cdk/core';
 import { LambdaDestination } from '@aws-cdk/aws-logs-destinations';
-import { IResource, RestApi, CfnAuthorizer, AuthorizationType, IAuthorizer } from '@aws-cdk/aws-apigateway';
+import { IResource, RestApi, IdentitySource, RequestAuthorizer } from '@aws-cdk/aws-apigateway';
+import { Function, LayerVersion, Runtime, Code } from '@aws-cdk/aws-lambda';
 import { LogGroup, SubscriptionFilter, FilterPattern } from '@aws-cdk/aws-logs';
-import { Function, LayerVersion, Runtime, Code, IFunction } from '@aws-cdk/aws-lambda';
 
 interface MultistackProps extends StackProps {
+	role: Role;
 	region: String;
 	lambdaLayer: LayerVersion;
-	managedPolicy: Role;
 }
 
 class Gateway extends Stack {
 
 	gateway: IResource;
-	authorizer: CfnAuthorizer;
+	authorizer: RequestAuthorizer;
 
 	constructor(scope: Construct, id: string, props: MultistackProps) {
 		super(scope, id, props);
@@ -33,8 +33,8 @@ class Gateway extends Stack {
 			handler: 'index.handler',
 			code: Code.fromAsset('./src/authorizer/'),
 			runtime: Runtime.NODEJS_12_X,
-			role: props.managedPolicy,
 			layers: [props.lambdaLayer],
+			role: props.role,
 			environment: {
 				CDK_DEFAULT_REGION: process.env.CDK_DEFAULT_REGION || '',
 				CDK_DEFAULT_ACCOUNT: process.env.CDK_DEFAULT_ACCOUNT || '',
@@ -52,11 +52,9 @@ class Gateway extends Stack {
 		}
 		new SubscriptionFilter(this, 'authorizer-elastic-search-subscription', configuration);
 
-		this.authorizer = new CfnAuthorizer(this, 'custom-authorizer', {
-			restApiId: gateway.restApiId,
-			name: 'custom-authorizer',
-			type: AuthorizationType.CUSTOM,
-			authorizerUri: `arn:aws:apigateway:${props.region}:lambda:path/2015-03-31/functions/${authorizerFunction.functionArn}/invocations`,
+		this.authorizer = new RequestAuthorizer(this, 'custom-authorizer', {
+			handler: authorizerFunction,
+  		identitySources: [IdentitySource.header('Authorization')]
 		});
 	}
 }
