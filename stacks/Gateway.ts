@@ -24,7 +24,7 @@ class Gateway extends Stack {
      */
     const gateway = new RestApi(this, 'serverless-application-api', { deploy: false });
     const deployment = new Deployment(this, 'serverless-application-deployment', { api: gateway, retainDeployments: true });
-    new Stage(this, props.parameters.DEPLOYMENT_STAGE, { deployment });
+    new Stage(this, props.parameters.DEPLOYMENT_STAGE, { deployment, stageName: props.parameters.DEPLOYMENT_STAGE });
     this.gateway = gateway.root.addResource('api');
 
     /**

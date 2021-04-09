@@ -19,9 +19,11 @@ const env = {
   region: process.env.CDK_DEFAULT_REGION || 'us-east-1'
 }
 
-const lambdaLayerStack = new LambdaLayer(app, 'LambdaLayerStack', { env })
-const managedPolicyStack = new SSMManagedPolicy(app, 'ManagedPolicyStack', { env })
-const gatewayStack = new Gateway(app, 'GatewayStack', {
+const createDeploymentName = (name: string) => `${environment}-${stage}-${name}`;
+
+const lambdaLayerStack = new LambdaLayer(app, createDeploymentName('LambdaLayerStack'), { env })
+const managedPolicyStack = new SSMManagedPolicy(app, createDeploymentName('ManagedPolicyStack'), { env })
+const gatewayStack = new Gateway(app, createDeploymentName('GatewayStack'), {
   lambdaLayer: lambdaLayerStack.lambdaLayer,
   role: managedPolicyStack.role,
   parameters: {
@@ -31,7 +33,7 @@ const gatewayStack = new Gateway(app, 'GatewayStack', {
   env,
 })
 
-new HealthcheckFunction(app, 'HealthcheckFunctionStack', {
+new HealthcheckFunction(app, createDeploymentName('HealthcheckFunctionStack'), {
   gateway: gatewayStack.gateway,
   lambdaLayer: lambdaLayerStack.lambdaLayer,
   role: managedPolicyStack.role,
