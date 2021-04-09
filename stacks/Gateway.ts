@@ -1,5 +1,5 @@
 import { Role } from '@aws-cdk/aws-iam'
-import { Stack, StackProps, Construct } from '@aws-cdk/core';
+import { Stack, StackProps, Construct, Duration } from '@aws-cdk/core';
 import { LambdaDestination } from '@aws-cdk/aws-logs-destinations';
 import { IResource, RestApi, IdentitySource, RequestAuthorizer } from '@aws-cdk/aws-apigateway';
 import { Function, LayerVersion, Runtime, Code } from '@aws-cdk/aws-lambda';
@@ -53,6 +53,7 @@ class Gateway extends Stack {
     new SubscriptionFilter(this, 'authorizer-elastic-search-subscription', configuration);
 
     this.authorizer = new RequestAuthorizer(this, 'custom-authorizer', {
+      resultsCacheTtl: Duration.minutes(0),
       handler: authorizerFunction,
       identitySources: [IdentitySource.header('Authorization')]
     });
