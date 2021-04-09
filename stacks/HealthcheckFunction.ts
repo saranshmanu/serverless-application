@@ -11,7 +11,7 @@ interface MultistackProps extends StackProps {
   gateway: IResource;
   lambdaLayer: LayerVersion;
   authorizer: RequestAuthorizer;
-  variables: Record<string, string>
+  parameters: Record<string, string>;
 }
 
 class HealthcheckFunction extends Stack {
@@ -27,7 +27,7 @@ class HealthcheckFunction extends Stack {
       layers: [props.lambdaLayer],
       role: props.role,
       environment: {
-        NODE_ENV: props.variables.NODE_ENV,
+        NODE_ENV: props.parameters.NODE_ENV,
         SSM_PARAMETER: StringParameter.valueForStringParameter(this, 'my-plain-parameter-name')
       }
     });

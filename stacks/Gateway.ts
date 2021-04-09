@@ -1,14 +1,14 @@
 import { Role } from '@aws-cdk/aws-iam'
-import { Stack, StackProps, Construct, Duration } from '@aws-cdk/core';
 import { LambdaDestination } from '@aws-cdk/aws-logs-destinations';
-import { IResource, RestApi, IdentitySource, RequestAuthorizer } from '@aws-cdk/aws-apigateway';
+import { Stack, StackProps, Construct, Duration } from '@aws-cdk/core';
 import { Function, LayerVersion, Runtime, Code } from '@aws-cdk/aws-lambda';
 import { LogGroup, SubscriptionFilter, FilterPattern } from '@aws-cdk/aws-logs';
+import { IResource, RestApi, Deployment, Stage, IdentitySource, RequestAuthorizer } from '@aws-cdk/aws-apigateway';
 
 interface MultistackProps extends StackProps {
   role: Role;
-  region: String;
   lambdaLayer: LayerVersion;
+  parameters: Record<string, string>;
 }
 
 class Gateway extends Stack {
@@ -22,7 +22,9 @@ class Gateway extends Stack {
     /**
      * API Gateway
      */
-    const gateway = new RestApi(this, 'serverless-application-api', {});
+    const gateway = new RestApi(this, 'serverless-application-api', { deploy: false });
+    const deployment = new Deployment(this, 'serverless-application-deployment', { api: gateway, retainDeployments: true });
+    new Stage(this, props.parameters.DEPLOYMENT_STAGE, { deployment });
     this.gateway = gateway.root.addResource('api');
 
     /**
@@ -38,7 +40,7 @@ class Gateway extends Stack {
       environment: {
         CDK_DEFAULT_REGION: process.env.CDK_DEFAULT_REGION || '',
         CDK_DEFAULT_ACCOUNT: process.env.CDK_DEFAULT_ACCOUNT || '',
-        NODE_ENV: process.env.NODE_ENV || '',
+        NODE_ENV: props.parameters.NODE_ENV || '',
       }
     });
 

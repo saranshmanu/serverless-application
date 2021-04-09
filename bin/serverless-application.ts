@@ -9,6 +9,7 @@ import { SSMManagedPolicy } from '../stacks/ManagedPolicy';
 import { HealthcheckFunction } from '../stacks/HealthcheckFunction';
 
 const app = new cdk.App();
+const stage = app.node.tryGetContext('stage') as string;
 const environment = app.node.tryGetContext('environment') as string;
 const file = readFileSync(`./aws/${environment}.yaml`, 'utf8')
 const parameters = parse(file)
@@ -23,7 +24,10 @@ const managedPolicyStack = new SSMManagedPolicy(app, 'ManagedPolicyStack', { env
 const gatewayStack = new Gateway(app, 'GatewayStack', {
   lambdaLayer: lambdaLayerStack.lambdaLayer,
   role: managedPolicyStack.role,
-  region: env.region,
+  parameters: {
+    DEPLOYMENT_STAGE: stage,
+    NODE_ENV: parameters.NODE_ENV,
+  },
   env,
 })
 
@@ -32,7 +36,7 @@ new HealthcheckFunction(app, 'HealthcheckFunctionStack', {
   lambdaLayer: lambdaLayerStack.lambdaLayer,
   role: managedPolicyStack.role,
   authorizer: gatewayStack.authorizer,
-  variables: {
+  parameters: {
     NODE_ENV: parameters.NODE_ENV,
   },
   env,
