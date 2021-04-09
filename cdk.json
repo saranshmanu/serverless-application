@@ -8,10 +8,6 @@
     "@aws-cdk/aws-secretsmanager:parseOwnedSecretName": true,
     "@aws-cdk/aws-kms:defaultKeyPolicies": true,
     "@aws-cdk/aws-s3:grantWriteWithoutAcl": true,
-    "@aws-cdk/aws-ecs-patterns:removeDefaultDesiredCount": true,
-    "STAGE": "dev",
-    "dev": {
-      "NODE_ENV": "dev-environment"
-    }
+    "@aws-cdk/aws-ecs-patterns:removeDefaultDesiredCount": true
   }
 }

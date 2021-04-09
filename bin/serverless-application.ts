@@ -1,14 +1,17 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from '@aws-cdk/core';
+import { parse } from 'yaml';
+import { readFileSync } from 'fs';
 import { Gateway } from '../stacks/Gateway';
 import { LambdaLayer } from '../stacks/LambdaLayer';
 import { SSMManagedPolicy } from '../stacks/ManagedPolicy';
 import { HealthcheckFunction } from '../stacks/HealthcheckFunction';
 
 const app = new cdk.App();
-const stage = app.node.tryGetContext('STAGE') as string;
-const parameters = app.node.tryGetContext(stage) as Record<string, string>
+const environment = app.node.tryGetContext('environment') as string;
+const file = readFileSync(`./aws/${environment}.yaml`, 'utf8')
+const parameters = parse(file)
 
 const env = {
   account: process.env.CDK_DEFAULT_ACCOUNT,

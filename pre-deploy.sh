@@ -6,6 +6,6 @@ cd dependencies/nodejs
 npm i --force
 cd ../../
 npm run build
-cdk synth --quiet --context env_name=$environment
+npm run synth:${environment}
 
 echo "Build complete for $environment"
