@@ -7,6 +7,6 @@ cd dependencies/nodejs
 npm i --force
 cd ../../
 npm run build
-cdk synth --context environment=${environment} --context stage=${stage}
+cdk synth --context environment=${environment} --context stage=${stage} --quiet
 
 echo "Build complete for $environment environment & $stage stage"

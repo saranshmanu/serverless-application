@@ -1,12 +1,12 @@
 import { Stack, StackProps, Construct } from '@aws-cdk/core';
 import { LayerVersion, Runtime, Code } from '@aws-cdk/aws-lambda';
 
-class LambdaLayer extends Stack {
+class LambdaLayer extends Construct {
 
   lambdaLayer: LayerVersion;
 
-  constructor(scope: Construct, id: string, props: StackProps) {
-    super(scope, id, props);
+  constructor(scope: Construct, id: string) {
+    super(scope, id);
     this.lambdaLayer = new LayerVersion(this, 'dependency-layer', {
       layerVersionName: 'serverless-lambda-layer',
       code: Code.fromAsset('./dependencies'),

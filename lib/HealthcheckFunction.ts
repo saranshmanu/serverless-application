@@ -1,11 +1,11 @@
 import { Role } from '@aws-cdk/aws-iam'
-import { Stack, StackProps, Construct } from '@aws-cdk/core';
+import { Construct } from '@aws-cdk/core';
 import { LambdaDestination } from '@aws-cdk/aws-logs-destinations';
 import { LambdaIntegration, IResource, AuthorizationType, RequestAuthorizer } from '@aws-cdk/aws-apigateway';
 import { LogGroup, SubscriptionFilter, FilterPattern } from '@aws-cdk/aws-logs';
 import { Function, LayerVersion, Runtime, Code } from '@aws-cdk/aws-lambda';
 
-interface MultistackProps extends StackProps {
+interface MultistackProps {
   role: Role;
   gateway: IResource;
   lambdaLayer: LayerVersion;
@@ -13,10 +13,10 @@ interface MultistackProps extends StackProps {
   parameters: Record<string, string>;
 }
 
-class HealthcheckFunction extends Stack {
+class HealthcheckFunction extends Construct {
 
   constructor(scope: Construct, id: string, props: MultistackProps) {
-    super(scope, id, props);
+    super(scope, id);
 
     const lambda = new Function(this, 'healthcheck-function', {
       functionName: 'healthcheck-function',

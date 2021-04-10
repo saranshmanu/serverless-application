@@ -1,23 +1,23 @@
 import { Role } from '@aws-cdk/aws-iam'
 import { LambdaDestination } from '@aws-cdk/aws-logs-destinations';
-import { Stack, StackProps, Construct, Duration } from '@aws-cdk/core';
+import { Construct, Duration } from '@aws-cdk/core';
 import { Function, LayerVersion, Runtime, Code } from '@aws-cdk/aws-lambda';
 import { LogGroup, SubscriptionFilter, FilterPattern } from '@aws-cdk/aws-logs';
 import { IResource, RestApi, Deployment, Stage, IdentitySource, RequestAuthorizer } from '@aws-cdk/aws-apigateway';
 
-interface MultistackProps extends StackProps {
+interface MultistackProps {
   role: Role;
   lambdaLayer: LayerVersion;
   parameters: Record<string, string>;
 }
 
-class Gateway extends Stack {
+class Gateway extends Construct {
 
   gateway: IResource;
   authorizer: RequestAuthorizer;
 
   constructor(scope: Construct, id: string, props: MultistackProps) {
-    super(scope, id, props);
+    super(scope, id);
 
     /**
      * API Gateway
