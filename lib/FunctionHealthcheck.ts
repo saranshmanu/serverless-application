@@ -1,14 +1,17 @@
 import { Role } from '@aws-cdk/aws-iam'
 import { Construct } from '@aws-cdk/core';
+import { SecurityGroup, Vpc } from "@aws-cdk/aws-ec2";
 import { LambdaDestination } from '@aws-cdk/aws-logs-destinations';
 import { LambdaIntegration, IResource, AuthorizationType, RequestAuthorizer } from '@aws-cdk/aws-apigateway';
 import { LogGroup, SubscriptionFilter, FilterPattern } from '@aws-cdk/aws-logs';
 import { Function, LayerVersion, Runtime, Code } from '@aws-cdk/aws-lambda';
 
 interface MultistackProps {
+  vpc: Vpc;
   role: Role;
   gateway: IResource;
   lambdaLayer: LayerVersion;
+  securityGroup: SecurityGroup;
   authorizer: RequestAuthorizer;
   parameters: Record<string, string>;
 }
@@ -24,6 +27,8 @@ class FunctionHealthcheck extends Construct {
       code: Code.fromAsset('./src/healthcheck/get/'),
       runtime: Runtime.NODEJS_12_X,
       layers: [props.lambdaLayer],
+      vpc: props.vpc,
+      securityGroup: props.securityGroup,
       role: props.role,
       environment: {
         NODE_ENV: props.parameters.NODE_ENV,

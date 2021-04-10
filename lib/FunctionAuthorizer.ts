@@ -1,13 +1,16 @@
 import { Role } from '@aws-cdk/aws-iam'
 import { LambdaDestination } from '@aws-cdk/aws-logs-destinations';
+import { SecurityGroup, Vpc } from "@aws-cdk/aws-ec2";
 import { Construct, Duration } from '@aws-cdk/core';
 import { Function, LayerVersion, Runtime, Code } from '@aws-cdk/aws-lambda';
 import { LogGroup, SubscriptionFilter, FilterPattern } from '@aws-cdk/aws-logs';
 import { IdentitySource, RequestAuthorizer } from '@aws-cdk/aws-apigateway';
 
 interface MultistackProps {
+  vpc: Vpc;
   role: Role;
   lambdaLayer: LayerVersion;
+  securityGroup: SecurityGroup;
   parameters: Record<string, string>;
 }
 
@@ -24,6 +27,8 @@ class FunctionAuthorizer extends Construct {
       code: Code.fromAsset('./src/authorizer/'),
       runtime: Runtime.NODEJS_12_X,
       layers: [props.lambdaLayer],
+      vpc: props.vpc,
+      securityGroup: props.securityGroup,
       role: props.role,
       environment: {
         CDK_DEFAULT_REGION: process.env.CDK_DEFAULT_REGION || '',

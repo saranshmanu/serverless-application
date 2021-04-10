@@ -2,7 +2,8 @@ import { Stack, Construct, StackProps } from '@aws-cdk/core';
 
 import { Gateway } from './Gateway';
 import { LambdaLayer } from './LambdaLayer';
-import { SSMManagedPolicy } from './ManagedPolicy';
+import { VPCSecurityGroup } from './SecurityGroup';
+import { LambdaManagedPolicy } from './ManagedPolicy';
 import { FunctionAuthorizer } from './FunctionAuthorizer';
 import { FunctionHealthcheck } from './FunctionHealthcheck';
 
@@ -28,7 +29,7 @@ class ServerlessApplication extends Stack {
   constructor(scope: Construct, id: string, props: MultistackProps) {
     super(scope, id, props);
     /* Managed Policy Construct for SSM Parameters */
-    const { role } = new SSMManagedPolicy(this, 'ManagedPolicy');
+    const { role } = new LambdaManagedPolicy(this, 'ManagedPolicy');
     /* Lambda Layer Construct for Lambda Dependencies */
     const { lambdaLayer } = new LambdaLayer(this, 'LambdaLayer');
     /* Gateway Construct for routing Lambda Functions and custom Authorizers */
@@ -38,9 +39,11 @@ class ServerlessApplication extends Stack {
         NODE_ENV: this.read(props.parameters.NODE_ENV, props.environment)
       },
     });
+    /* Security Group Construct for VPC configuration */
+    const { securityGroup, vpc } = new VPCSecurityGroup(this, 'VPCSecurityGroup');
     /* Custom Authorizer Construct for Lambda Function and Log Groups */
     const { authorizer } = new FunctionAuthorizer(this, 'AuthorizerFunction', {
-      lambdaLayer, role,
+      lambdaLayer, role, securityGroup, vpc,
       parameters: {
         NODE_ENV: this.read(props.parameters.NODE_ENV, props.environment),
         SSM_PARAMETER: this.read(props.parameters.SSM_PARAMETER, props.environment)
@@ -48,7 +51,7 @@ class ServerlessApplication extends Stack {
     });
     /* Healthcheck Function for Lambda Function and Log Groups */
     new FunctionHealthcheck(this, 'HealthcheckFunction', {
-      lambdaLayer, authorizer, gateway, role,
+      lambdaLayer, authorizer, gateway, role, securityGroup, vpc,
       parameters: {
         NODE_ENV: this.read(props.parameters.NODE_ENV, props.environment),
         SSM_PARAMETER: this.read(props.parameters.SSM_PARAMETER, props.environment)
