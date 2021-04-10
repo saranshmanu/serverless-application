@@ -20,6 +20,12 @@ const env = {
 }
 
 const createDeploymentName = (name: string) => `${environment}-${stage}-${name}`;
+const read = (parameter: string) => {
+  if (parameter.includes('ssm://')) {
+    return parameter.slice(0, 6) + `${environment}/` + parameter.slice(6);
+  }
+  return parameter
+}
 
 const lambdaLayerStack = new LambdaLayer(app, createDeploymentName('LambdaLayerStack'), { env })
 const managedPolicyStack = new SSMManagedPolicy(app, createDeploymentName('ManagedPolicyStack'), { env })
@@ -27,8 +33,8 @@ const gatewayStack = new Gateway(app, createDeploymentName('GatewayStack'), {
   lambdaLayer: lambdaLayerStack.lambdaLayer,
   role: managedPolicyStack.role,
   parameters: {
-    DEPLOYMENT_STAGE: stage,
-    NODE_ENV: parameters.NODE_ENV,
+    DEPLOYMENT_STAGE: read(stage),
+    NODE_ENV: read(parameters.NODE_ENV),
   },
   env,
 })
@@ -39,7 +45,8 @@ new HealthcheckFunction(app, createDeploymentName('HealthcheckFunctionStack'), {
   role: managedPolicyStack.role,
   authorizer: gatewayStack.authorizer,
   parameters: {
-    NODE_ENV: parameters.NODE_ENV,
+    NODE_ENV: read(parameters.NODE_ENV),
+    SSM_PARAMETER: read(parameters.SSM_PARAMETER),
   },
   env,
 })

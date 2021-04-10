@@ -1,5 +1,5 @@
-read -p "Enter the environment: "  environment
 read -p "Enter the stage: "  stage
+read -p "Enter the environment: "  environment
 
 rm -rf cdk.out
 npm i --force

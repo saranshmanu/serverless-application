@@ -4,7 +4,6 @@ import { LambdaDestination } from '@aws-cdk/aws-logs-destinations';
 import { LambdaIntegration, IResource, AuthorizationType, RequestAuthorizer } from '@aws-cdk/aws-apigateway';
 import { LogGroup, SubscriptionFilter, FilterPattern } from '@aws-cdk/aws-logs';
 import { Function, LayerVersion, Runtime, Code } from '@aws-cdk/aws-lambda';
-import { StringParameter } from '@aws-cdk/aws-ssm';
 
 interface MultistackProps extends StackProps {
   role: Role;
@@ -28,7 +27,7 @@ class HealthcheckFunction extends Stack {
       role: props.role,
       environment: {
         NODE_ENV: props.parameters.NODE_ENV,
-        SSM_PARAMETER: StringParameter.valueForStringParameter(this, 'my-plain-parameter-name')
+        SSM_PARAMETER: props.parameters.SSM_PARAMETER,
       }
     });
 
