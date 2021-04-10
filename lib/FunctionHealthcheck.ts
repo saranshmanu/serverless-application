@@ -13,7 +13,7 @@ interface MultistackProps {
   parameters: Record<string, string>;
 }
 
-class HealthcheckFunction extends Construct {
+class FunctionHealthcheck extends Construct {
 
   constructor(scope: Construct, id: string, props: MultistackProps) {
     super(scope, id);
@@ -49,4 +49,4 @@ class HealthcheckFunction extends Construct {
   }
 }
 
-export { HealthcheckFunction }
+export { FunctionHealthcheck }

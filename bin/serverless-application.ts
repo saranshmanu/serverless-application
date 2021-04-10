@@ -11,15 +11,10 @@ const environment = app.node.tryGetContext('environment') as string;
 const file = readFileSync(`./aws/${environment}.yaml`, 'utf8');
 const parameters = parse(file);
 
-/* Environment variables for stack deployment */
-const env = {
-  account: process.env.CDK_DEFAULT_ACCOUNT,
-  region: process.env.CDK_DEFAULT_REGION || 'us-east-1'
-};
-
 new ServerlessApplication(app, `${environment}-${stage}-serverless-application`, {
-  environment,
-  parameters,
-  stage,
-  env,
+  environment, parameters, stage,
+  env: {
+    account: process.env.CDK_DEFAULT_ACCOUNT,
+    region: process.env.CDK_DEFAULT_REGION || 'us-east-1'
+  },
 });

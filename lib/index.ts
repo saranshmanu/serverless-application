@@ -3,9 +3,10 @@ import { Stack, Construct, StackProps } from '@aws-cdk/core';
 import { Gateway } from './Gateway';
 import { LambdaLayer } from './LambdaLayer';
 import { SSMManagedPolicy } from './ManagedPolicy';
-import { HealthcheckFunction } from './HealthcheckFunction';
+import { FunctionAuthorizer } from './FunctionAuthorizer';
+import { FunctionHealthcheck } from './FunctionHealthcheck';
 
-interface MultistackProps extends StackProps{
+interface MultistackProps extends StackProps {
   parameters: Record<string, string>;
   environment: string;
   stage: string;
@@ -31,15 +32,22 @@ class ServerlessApplication extends Stack {
     /* Lambda Layer Construct for Lambda Dependencies */
     const { lambdaLayer } = new LambdaLayer(this, 'LambdaLayer');
     /* Gateway Construct for routing Lambda Functions and custom Authorizers */
-    const { gateway, authorizer } = new Gateway(this, 'Gateway', {
-      lambdaLayer, role,
+    const { gateway } = new Gateway(this, 'Gateway', {
       parameters: {
         DEPLOYMENT_STAGE: this.read(props.stage, props.environment),
         NODE_ENV: this.read(props.parameters.NODE_ENV, props.environment)
       },
     });
-    /* Healthcheck Function Construct for Lambda Function and Log Groups */
-    new HealthcheckFunction(this, 'HealthcheckFunction', {
+    /* Custom Authorizer Construct for Lambda Function and Log Groups */
+    const { authorizer } = new FunctionAuthorizer(this, 'AuthorizerFunction', {
+      lambdaLayer, role,
+      parameters: {
+        NODE_ENV: this.read(props.parameters.NODE_ENV, props.environment),
+        SSM_PARAMETER: this.read(props.parameters.SSM_PARAMETER, props.environment)
+      },
+    });
+    /* Healthcheck Function for Lambda Function and Log Groups */
+    new FunctionHealthcheck(this, 'HealthcheckFunction', {
       lambdaLayer, authorizer, gateway, role,
       parameters: {
         NODE_ENV: this.read(props.parameters.NODE_ENV, props.environment),
