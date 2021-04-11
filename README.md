@@ -10,11 +10,12 @@ The following services are used to create a serverless RESTApi using various Ama
 
  - AWS Lambda Functions
  - AWS API Gateway
- - AWS System Manager Service
+ - AWS System Manager
  - AWS Subscription Filter
  - AWS Managed Policy
  - AWS Log Groups
  - AWS Cloud Formation Stacks
+ - AWS Virtual Private Cloud
  - AWS IAM
 
 ## Usage 
@@ -34,16 +35,20 @@ aws configure
 
 ### Build
 
+The application is built to support different stages and environments. The ssm keys are read according to the environment and we will have to configure it according to the format ```/<environment>/serverless-application/<parameter-name>``` in the AWS console
+
 ```bash
 npm run build
 cdk bootstrap
-cdk synth --quiet
+cdk synth --quiet -c stage=<prod/dev/stage> -c environment=<delta/iota>
 ```
 
 ### Deploy
 
+We need to specify the stage and environment to which we have to deploy
+
 ```bash
-cdk deploy --all
+cdk deploy --all -c stage=<prod/dev/stage> -c environment=<delta/iota>
 ```
 
 ## Contributing
